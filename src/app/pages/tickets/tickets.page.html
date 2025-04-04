@@ -1,0 +1,43 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Tickets</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-grid class="ion-margin ion-no-padding">
+    <ion-row class="ion-text-center ion-align-items-center ion-padding-bottom ion-padding-top header">
+      <ion-col>ID</ion-col>
+      <ion-col>Asunto</ion-col>
+      <ion-col>Descripción</ion-col>
+      <ion-col>Estado</ion-col>
+      <ion-col>Fecha de Creación</ion-col>
+      <ion-col>Asignado</ion-col>
+      <ion-col>Operaciones</ion-col>
+    </ion-row>
+    <ion-row *ngFor="let t of tickets"
+      class="ion-text-center ion-padding-bottom ion-padding-top ion-align-items-center row">
+      <ion-col>{{t.id}}</ion-col>
+      <ion-col>{{t.asunto}}</ion-col>
+      <ion-col>{{t.descripcion}}</ion-col>
+      <ion-col [ngClass]="colorEstado(t.estado)">{{t.estado}}</ion-col>
+      <ion-col>{{fechaTexto(t.fecha_creacion, 0)}}</ion-col>
+      <ion-col>{{t.asignado_a}}</ion-col>
+      <ion-col>
+        <ion-buttons class="ion-justify-content-center">
+          <ion-button fill="clear" shape="round">
+            <ion-icon color="warning" name="create"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" shape="round">
+            <ion-icon color="danger" name="trash"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="success">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
