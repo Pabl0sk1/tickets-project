@@ -1,0 +1,101 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Clientes</ion-title>
+    <ion-buttons slot="start">
+      <ion-button (click)="openMenu()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-grid class="responsive-table ">
+    <ng-container *ngIf="isMobile; else desktopView">
+      <ion-row *ngFor="let c of customers" class="mobile-card">
+        <ion-col size="12"><strong>Nombre:</strong> {{ c.nombre }}</ion-col>
+        <ion-col size="12"><strong>Documento:</strong> {{ c.documento }}</ion-col>
+        <ion-col size="12"><strong>Nacionalidad:</strong> {{ c.nacionalidad }}</ion-col>
+        <ion-col size="12"><strong>País:</strong> {{ c.pais }}</ion-col>
+        <ion-col size="12"><strong>Dirección:</strong> {{ c.direccion }}</ion-col>
+        <ion-col size="12"><strong>Teléfono:</strong> {{ c.telefono }}</ion-col>
+        <ion-col size="12">
+          <ion-buttons class="ion-justify-content-center">
+            <ion-button style="margin-right: 10px; width: 100px;" fill="solid" (click)="edit(c)" color="warning"
+              shape="round">
+              Editar
+            </ion-button>
+            <ion-button style="margin-left: 10px; width: 100px;" fill="solid" (click)="showDeleteAlert(c)"
+              color="danger" shape="round">
+              Eliminar
+            </ion-button>
+          </ion-buttons>
+        </ion-col>
+      </ion-row>
+    </ng-container>
+
+    <ng-template #desktopView>
+      <ion-row class="ion-text-center header">
+        <ion-col>Nombre</ion-col>
+        <ion-col>Documento</ion-col>
+        <ion-col>Nacionalidad</ion-col>
+        <ion-col>País</ion-col>
+        <ion-col>Dirección</ion-col>
+        <ion-col>Teléfono</ion-col>
+        <ion-col>Operaciones</ion-col>
+      </ion-row>
+      <ion-row *ngFor="let c of customers" class="ion-text-center row">
+        <ion-col>{{ c.nombre }}</ion-col>
+        <ion-col>{{ c.documento }}</ion-col>
+        <ion-col>{{ c.nacionalidad }}</ion-col>
+        <ion-col>{{ c.pais }}</ion-col>
+        <ion-col>{{ c.direccion }}</ion-col>
+        <ion-col>{{ c.telefono }}</ion-col>
+        <ion-col>
+          <ion-buttons class="ion-justify-content-center">
+            <ion-button (click)="edit(c)" fill="clear" shape="round">
+              <ion-icon color="warning" name="create"></ion-icon>
+            </ion-button>
+            <ion-button (click)="showDeleteAlert(c)" fill="clear" shape="round">
+              <ion-icon color="danger" name="trash"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-col>
+      </ion-row>
+    </ng-template>
+  </ion-grid>
+
+  <ion-card>
+    <ion-item>
+      <ion-input label="Asunto" labelPlacement="floating" [(ngModel)]="newCustomer.nombre"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input label="Descripción" labelPlacement="floating" [(ngModel)]="newCustomer.documento"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input label="Nacionalidad" labelPlacement="floating" [(ngModel)]="newCustomer.nacionalidad"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input label="País" labelPlacement="floating" [(ngModel)]="newCustomer.pais"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input label="Dirección" labelPlacement="floating" [(ngModel)]="newCustomer.direccion"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input label="Teléfono" labelPlacement="floating" [(ngModel)]="newCustomer.telefono"></ion-input>
+    </ion-item>
+  </ion-card>
+
+  <div class="ion-text-center">
+    <ion-button style="margin-right: 10px; width: 100px;" (click)="save()" color="success" shape="round">
+      Guardar
+    </ion-button>
+    <ion-button style="margin-left: 10px; width: 100px;" (click)="cancel()" color="danger" shape="round">
+      Cancelar
+    </ion-button>
+  </div>
+</ion-content>
+
+<ion-alert [isOpen]="showAlert" [message]="'¿Estás seguro de que deseas eliminar este cliente?'"
+  [buttons]="alertButtons">
+</ion-alert>

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { MenuController } from '@ionic/angular';
 import { Timestamp } from 'firebase/firestore';
 import { Tickets } from 'src/app/models/tickets.model';
 import { FirestoreService } from 'src/app/services/firestore.service';
@@ -11,14 +12,28 @@ import { FirestoreService } from 'src/app/services/firestore.service';
 })
 export class TicketsPage implements OnInit {
 
-  constructor(
-    private firestore: FirestoreService
-  ) { }
+  tickets: Tickets[] = [];
+  newTicket!: Tickets & { fechahoraStr?: string };
+  showAlert = false;
+  ticketToDelete!: Tickets;
+  isMobile: boolean = false;
 
-  tickets: any[] = [];
+  openMenu = () => {
+    this.menuCtrl.toggle('principal');
+  }
+
+  constructor(private firestore: FirestoreService, private menuCtrl: MenuController) {
+    this.listarTickets();
+    this.initTickets();
+  }
 
   ngOnInit() {
-    this.listarTickets();
+    this.checkScreen();
+    window.addEventListener('resize', () => this.checkScreen());
+  }
+
+  checkScreen() {
+    this.isMobile = window.innerWidth < 768; // Puedes ajustar el valor según tus necesidades
   }
 
   colorEstado(estado: string): string {
@@ -47,9 +62,81 @@ export class TicketsPage implements OnInit {
     return fecha ? fecha.toLocaleString('es-ES', opciones) : '';
   }
 
+  initTickets() {
+    this.newTicket = {
+      id: this.firestore.createIdDoc(),
+      asunto: '',
+      descripcion: '',
+      estado: '',
+      fechahora: Timestamp.now(),
+      asignado_a: ''
+    }
+  }
+
   listarTickets() {
     this.firestore.getCollection<Tickets>('medicos').subscribe(data => {
-      if (data) this.tickets = data;
+      if (data) {
+        this.tickets = data.sort((a, b) => {
+          const fechaA = a.fechahora instanceof Timestamp ? a.fechahora.toDate().getTime() : 0;
+          const fechaB = b.fechahora instanceof Timestamp ? b.fechahora.toDate().getTime() : 0;
+          return fechaB - fechaA; // orden descendente (más reciente primero)
+        });
+      }
     });
+  }
+
+  edit(ticket: Tickets) {
+    this.newTicket = { ...ticket };
+    // Si fechahora es Timestamp, conviértelo a string ISO
+    if (this.newTicket.fechahora instanceof Timestamp) {
+      const fecha = this.newTicket.fechahora.toDate();
+      fecha.setHours(fecha.getHours() - 3);
+      this.newTicket.fechahoraStr = fecha.toISOString().slice(0, 16);
+    }
+  }
+
+  showDeleteAlert(ticket: Tickets) {
+    this.ticketToDelete = ticket;
+    this.showAlert = true;
+  }
+
+  async delete(ticket: Tickets) {
+    await this.firestore.deleteDocument('medicos', ticket.id);
+  }
+
+  async save() {
+    const ticketToSave = { ...this.newTicket };
+
+    if (ticketToSave.fechahoraStr) {
+      ticketToSave.fechahora = Timestamp.fromDate(new Date(ticketToSave.fechahoraStr));
+    }
+
+    delete ticketToSave.fechahoraStr; // Eliminamos el campo auxiliar
+
+    await this.firestore.createDocument(ticketToSave, 'medicos', ticketToSave.id);
+    this.initTickets();
+  }
+
+  async cancel() {
+    this.initTickets();
+  }
+
+  get alertButtons() {
+    return [
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+        handler: () => {
+          this.showAlert = false;
+        }
+      },
+      {
+        text: 'Eliminar',
+        handler: () => {
+          this.delete(this.ticketToDelete);
+          this.showAlert = false;
+        }
+      }
+    ];
   }
 }

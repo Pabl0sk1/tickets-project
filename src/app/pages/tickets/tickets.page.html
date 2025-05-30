@@ -1,43 +1,106 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>Tickets</ion-title>
+    <ion-title>Inicio</ion-title>
+    <ion-buttons slot="start">
+      <ion-button (click)="openMenu()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-grid class="ion-margin ion-no-padding">
-    <ion-row class="ion-text-center ion-align-items-center ion-padding-bottom ion-padding-top header">
-      <ion-col>ID</ion-col>
-      <ion-col>Asunto</ion-col>
-      <ion-col>Descripción</ion-col>
-      <ion-col>Estado</ion-col>
-      <ion-col>Fecha de Creación</ion-col>
-      <ion-col>Asignado</ion-col>
-      <ion-col>Operaciones</ion-col>
-    </ion-row>
-    <ion-row *ngFor="let t of tickets"
-      class="ion-text-center ion-padding-bottom ion-padding-top ion-align-items-center row">
-      <ion-col>{{t.id}}</ion-col>
-      <ion-col>{{t.asunto}}</ion-col>
-      <ion-col>{{t.descripcion}}</ion-col>
-      <ion-col [ngClass]="colorEstado(t.estado)">{{t.estado}}</ion-col>
-      <ion-col>{{fechaTexto(t.fecha_creacion, 0)}}</ion-col>
-      <ion-col>{{t.asignado_a}}</ion-col>
-      <ion-col>
-        <ion-buttons class="ion-justify-content-center">
-          <ion-button fill="clear" shape="round">
-            <ion-icon color="warning" name="create"></ion-icon>
-          </ion-button>
-          <ion-button fill="clear" shape="round">
-            <ion-icon color="danger" name="trash"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-col>
-    </ion-row>
+  <ion-grid class="responsive-table ">
+    <ng-container *ngIf="isMobile; else desktopView">
+      <ion-row *ngFor="let t of tickets" class="mobile-card">
+        <ion-col size="12"><strong>Asunto:</strong> {{ t.asunto }}</ion-col>
+        <ion-col size="12"><strong>Descripción:</strong> {{ t.descripcion }}</ion-col>
+        <ion-col size="12"><strong>Estado: </strong> <span [ngClass]="colorEstado(t.estado)">{{ t.estado
+            }}</span></ion-col>
+        <ion-col size="12"><strong>Fecha y Hora:</strong> {{ fechaTexto(t.fechahora, 1) }}</ion-col>
+        <ion-col size="12"><strong>Asignado:</strong> {{ t.asignado_a }}</ion-col>
+        <ion-col size="12">
+          <ion-buttons class="ion-justify-content-center">
+            <ion-button style="margin-right: 10px; width: 100px;" fill="solid" (click)="edit(t)" color="warning"
+              shape="round">
+              Editar
+            </ion-button>
+            <ion-button style="margin-left: 10px; width: 100px;" fill="solid" (click)="showDeleteAlert(t)"
+              color="danger" shape="round">
+              Eliminar
+            </ion-button>
+          </ion-buttons>
+        </ion-col>
+      </ion-row>
+    </ng-container>
+
+    <ng-template #desktopView>
+      <ion-row class="ion-text-center header">
+        <ion-col>Asunto</ion-col>
+        <ion-col>Descripción</ion-col>
+        <ion-col>Estado</ion-col>
+        <ion-col>Fecha y Hora</ion-col>
+        <ion-col>Asignado</ion-col>
+        <ion-col>Operaciones</ion-col>
+      </ion-row>
+      <ion-row *ngFor="let t of tickets" class="ion-text-center row">
+        <ion-col>{{ t.asunto }}</ion-col>
+        <ion-col>{{ t.descripcion }}</ion-col>
+        <ion-col [ngClass]="colorEstado(t.estado)">{{ t.estado }}</ion-col>
+        <ion-col>{{ fechaTexto(t.fechahora, 1) }}</ion-col>
+        <ion-col>{{ t.asignado_a }}</ion-col>
+        <ion-col>
+          <ion-buttons class="ion-justify-content-center">
+            <ion-button (click)="edit(t)" fill="clear" shape="round">
+              <ion-icon color="warning" name="create"></ion-icon>
+            </ion-button>
+            <ion-button (click)="showDeleteAlert(t)" fill="clear" shape="round">
+              <ion-icon color="danger" name="trash"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-col>
+      </ion-row>
+    </ng-template>
   </ion-grid>
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button color="success">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+
+  <ion-card>
+    <ion-item>
+      <ion-input label="Asunto" labelPlacement="floating" [(ngModel)]="newTicket.asunto"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input label="Descripción" labelPlacement="floating" [(ngModel)]="newTicket.descripcion"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-select label="Estado" labelPlacement="floating" [(ngModel)]="newTicket.estado" color="success">
+        <ion-select-option value="Activo">Activo</ion-select-option>
+        <ion-select-option value="Inactivo">Inactivo</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label>Fecha y Hora</ion-label>
+      <ion-datetime-button datetime="datetime" color="success"></ion-datetime-button>
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime id="datetime" color="success" locale="es-ES" presentation="date-time"
+            [(ngModel)]="newTicket.fechahoraStr"></ion-datetime>
+        </ng-template>
+      </ion-modal>
+    </ion-item>
+    <ion-item>
+      <ion-input label="Asignado a" labelPlacement="floating" [(ngModel)]="newTicket.asignado_a"></ion-input>
+    </ion-item>
+  </ion-card>
+
+  <div class="ion-text-center">
+    <ion-button style="margin-right: 10px; width: 100px;" (click)="save()" color="success" shape="round">
+      Guardar
+    </ion-button>
+    <ion-button style="margin-left: 10px; width: 100px;" (click)="cancel()" color="danger" shape="round">
+      Cancelar
+    </ion-button>
+  </div>
 </ion-content>
+
+<ion-alert [isOpen]="showAlert" [message]="'¿Estás seguro de que deseas eliminar este ticket?'"
+  [buttons]="alertButtons">
+</ion-alert>

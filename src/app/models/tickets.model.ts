@@ -5,6 +5,6 @@ export interface Tickets {
     asunto: string,
     descripcion: string,
     estado: string,
-    fecha_creacion: Timestamp,
+    fechahora: Timestamp,
     asignado_a: string
 }
